@@ -111,7 +111,6 @@ The tool can automatically convert linear UnicodeMath to professional 2D formats
 word-latex-renderer/
 ├── main.py              # Main CLI application with auto-rendering
 ├── start.bat            # Windows batch launcher
-├── create_test.py       # Test document generator
 ├── 使用指南.md          # Detailed Chinese user guide
 ├── 重要说明.md          # Technical notes and limitations
 ├── README.md            # This file
