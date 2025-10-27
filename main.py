@@ -12,68 +12,98 @@ import subprocess
 import argparse
 import io
 import time
-from docx import Document
-from docx.oxml import parse_xml
-from docx.oxml.ns import nsdecls
+
+def print_banner():
+    """显示炫酷的启动横幅"""
+    banner = r"""
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║   ██╗    ██╗ ██████╗ ██████╗ ██████╗     ██╗      █████╗ ████████╗║
+║   ██║    ██║██╔═══██╗██╔══██╗██╔══██╗    ██║     ██╔══██╗╚══██╔══╝║
+║   ██║ █╗ ██║██║   ██║██████╔╝██║  ██║    ██║     ███████║   ██║   ║
+║   ██║███╗██║██║   ██║██╔══██╗██║  ██║    ██║     ██╔══██║   ██║   ║
+║   ╚███╔███╔╝╚██████╔╝██║  ██║██████╔╝    ███████╗██║  ██║   ██║   ║
+║    ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═════╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ║
+║                                                                    ║
+║              ███████╗ ██████╗ ██████╗ ███╗   ███╗██╗   ██╗██╗      ║
+║              ██╔════╝██╔═══██╗██╔══██╗████╗ ████║██║   ██║██║      ║
+║              █████╗  ██║   ██║██████╔╝██╔████╔██║██║   ██║██║      ║
+║              ██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║██║   ██║██║      ║
+║              ██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║╚██████╔╝███████╗ ║
+║              ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝ ║
+║                                                                    ║
+║              ██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗     ║
+║              ██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗    ║
+║              ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝    ║
+║              ██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗    ║
+║              ██║  ██║███████╗██║ ╚████║██████╔╝███████╗██║  ██║    ║
+║              ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+    🚀 LaTeX → Word 公式转换器 & 自动渲染工具
+    📦 Version 3.0 - Ultimate Edition
+    ⚡ 一键转换 | 自动渲染 | 专业格式
+    
+    💡 功能：将 $...$ LaTeX 公式转换为 Word 原生公式对象
+    🎨 特色：自动渲染为专业的二维数学格式
+    
+"""
+    print(banner)
 
 def check_dependencies(auto_install=False):
     """检查并安装必要的依赖"""
-    required_packages = ['python-docx']
-    missing_packages = []
-
-    print("\n🔍 检查依赖...")
-    for package in required_packages:
-        try:
-            __import__(package.replace('-', '_'))
-            print(f"   ✅ {package}")
-        except ImportError:
-            missing_packages.append(package)
-            print(f"   ❌ {package} - 未安装")
-
-    if missing_packages:
-        print(f"\n⚠️  发现 {len(missing_packages)} 个缺失的依赖包:")
-        for pkg in missing_packages:
-            print(f"   • {pkg}")
-
+    print("🔍 检查依赖...")
+    
+    # 尝试导入 docx
+    try:
+        import docx
+        from docx import Document
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        print("   ✅ python-docx")
+        return True
+    except ImportError:
+        print("   ❌ python-docx - 未安装")
+        
         # 如果启用了自动安装，或者在非交互式环境中
         if auto_install or not sys.stdin.isatty():
             print("\n📦 正在自动安装依赖...")
             try:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install'] + missing_packages)
+                subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'python-docx'])
                 print("✅ 依赖安装完成！")
                 return True
             except subprocess.CalledProcessError as e:
                 print(f"❌ 依赖安装失败: {e}")
-                print("请手动运行: pip install " + ' '.join(missing_packages))
+                print("请手动运行: pip install python-docx")
                 return False
         else:
             # 交互式模式
             try:
-                choice = input("\n是否自动安装缺失的依赖？(y/n): ").strip().lower()
+                choice = input("\n是否自动安装 python-docx？(y/n): ").strip().lower()
                 if choice == 'y':
                     print("\n📦 正在安装依赖...")
                     try:
-                        subprocess.check_call([sys.executable, '-m', 'pip', 'install'] + missing_packages)
+                        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'python-docx'])
                         print("✅ 依赖安装完成！")
                         return True
                     except subprocess.CalledProcessError as e:
                         print(f"❌ 依赖安装失败: {e}")
-                        print("请手动运行: pip install " + ' '.join(missing_packages))
+                        print("请手动运行: pip install python-docx")
                         return False
                 else:
                     print("❌ 请先安装依赖后重新运行程序")
                     return False
             except EOFError:
                 print("\n⚠️  非交互式环境，跳过依赖安装")
-                print("请手动运行: pip install " + ' '.join(missing_packages))
+                print("请手动运行: pip install python-docx")
                 return False
-
-    print("✅ 所有依赖已就绪！")
-    return True
 
 def check_dollar_signs(file_path):
     """检查$符号是否成对出现"""
     try:
+        from docx import Document
+        
         doc = Document(file_path)
         total_dollar_count = 0
 
@@ -181,6 +211,9 @@ def latex_to_unicodemath(latex_str):
 def create_omml_formula(latex_str):
     """创建OMML公式元素"""
     try:
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        
         unicodemath = latex_to_unicodemath(latex_str)
         unicodemath_escaped = unicodemath.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
@@ -196,6 +229,60 @@ def create_omml_formula(latex_str):
         return omml, unicodemath
     except Exception as e:
         return None, None
+
+def check_and_close_word_document(file_path):
+    """检查Word文档是否被打开，如果打开则询问是否关闭"""
+    try:
+        import win32com.client
+        from win32com.client import GetObject
+        import pythoncom
+        
+        abs_path = os.path.abspath(file_path)
+        
+        try:
+            # 尝试获取现有的Word应用程序实例
+            word = win32com.client.GetActiveObject("Word.Application")
+            
+            # 检查文档是否已打开
+            for doc in word.Documents:
+                if os.path.abspath(doc.FullName).lower() == abs_path.lower():
+                    print(f"\n⚠️  检测到文档已在Word中打开")
+                    print(f"📂 文档: {os.path.basename(file_path)}")
+                    
+                    choice = input("\n是否保存并关闭文档以继续处理？(y/n): ").strip().lower()
+                    
+                    if choice == 'y':
+                        try:
+                            # 保存文档
+                            if doc.Saved == False:
+                                print("💾 正在保存文档...")
+                                doc.Save()
+                                print("✅ 文档已保存")
+                            
+                            # 关闭文档
+                            print("🔒 正在关闭文档...")
+                            doc.Close()
+                            print("✅ 文档已关闭")
+                            time.sleep(1)  # 等待文档完全关闭
+                            return True
+                        except Exception as e:
+                            print(f"❌ 关闭文档失败: {e}")
+                            return False
+                    else:
+                        print("❌ 用户取消操作")
+                        return False
+        except:
+            # 没有运行的Word实例或文档未打开
+            pass
+        
+        return True
+        
+    except ImportError:
+        # pywin32未安装，跳过检查
+        return True
+    except Exception as e:
+        # 其他错误，继续执行
+        return True
 
 def auto_render_formulas(file_path):
     """自动打开Word并将公式渲染为专业格式"""
@@ -327,8 +414,11 @@ def auto_render_formulas(file_path):
 def process_document(input_path, output_path):
     """处理Word文档"""
     try:
+        from docx import Document
+        from docx.oxml import parse_xml
+        
         print(f"\n{'='*70}")
-        print(f"� 开始处理文档")
+        print(f"🔄 开始处理文档")
         print(f"{'='*70}")
         print(f"📂 输入: {input_path}")
         print(f"📄 输出: {output_path}")
@@ -419,6 +509,10 @@ def main():
             kernel32.SetConsoleCP(65001)
         except:
             pass
+    
+    # 显示炫酷的启动横幅
+    print_banner()
+    
     parser = argparse.ArgumentParser(
         description='Word LaTeX公式渲染器 - 将Word文档中的 $...$ LaTeX公式转换为Word公式对象',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -443,16 +537,11 @@ def main():
 
     args = parser.parse_args()
 
-    print("="*70)
-    print(" Word LaTeX公式渲染器 - CLI工具")
-    print("="*70)
-    print("功能：自动将Word文档中的 $...$ LaTeX公式转换为Word公式对象")
-    print("版本：2.0 - CLI版")
-    print("="*70)
-
     # 1. 检查依赖
+    print("\n" + "="*70)
     if not check_dependencies(args.auto_install):
         return
+    print("="*70)
 
     # 如果提供了命令行参数，使用参数模式
     if args.input_file:
@@ -508,6 +597,14 @@ def main():
 
     # 3/5. 检查$符号（参数模式也需要检查）
     if not check_dollar_signs(file_path):
+        return
+    
+    # 检查并关闭Word文档（如果已打开）
+    print("\n" + "="*70)
+    print("🔍 检查文档状态...")
+    print("="*70)
+    if not check_and_close_word_document(file_path):
+        print("❌ 无法继续：文档仍在使用中")
         return
 
     # 6. 确认操作（仅交互模式）
